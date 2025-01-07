@@ -12,7 +12,12 @@ import com.sergio.bodegainfante.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +33,20 @@ public class ProductService implements IProductService {
     private ModificationRepository modificationRepository;
     @Autowired
     private UserRepository userRepository;
+
+    private static final String IMAGE_DIR = "src/main/resources/static/images/";
+
+    public String saveImage(MultipartFile image) {
+        try {
+            String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
+            Path path = Paths.get(IMAGE_DIR + fileName);
+            Files.write(path, image.getBytes());
+            return "/images/" + fileName;  // Esta es la URL relativa de la imagen
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image", e);
+        }
+    }
+
 
     @Override
     public List<Product> findAll() {

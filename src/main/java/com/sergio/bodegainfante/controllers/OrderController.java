@@ -18,8 +18,7 @@ public class OrderController {
     @Autowired
     private IOrderService orderService;
 
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> orders = orderService.findAll();
         if (orders.isEmpty()) {
@@ -39,7 +38,6 @@ public class OrderController {
     }
 
     @PostMapping("/create")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO, @RequestParam String customerEmail) {
         try {
             Order createdOrder = orderService.createOrder(orderDTO, customerEmail);
@@ -50,7 +48,7 @@ public class OrderController {
     }
 
     @PutMapping("/update/{orderId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Order> updateOrder(@RequestBody OrderDTO orderDTO, @PathVariable("orderId") Long orderId, @RequestParam String customerEmail) {
         try {
             Order updatedOrder = orderService.updateOrder(orderDTO, orderId, customerEmail);
@@ -61,7 +59,7 @@ public class OrderController {
     }
 
     @DeleteMapping("/delete/{orderId}")
-    @PreAuthorize("hasRole('CUSTOMER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteOrder(@PathVariable("orderId") Long orderId, @RequestParam String customerEmail) {
         try {
             boolean isDeleted = orderService.deleteOrder(orderId, customerEmail);

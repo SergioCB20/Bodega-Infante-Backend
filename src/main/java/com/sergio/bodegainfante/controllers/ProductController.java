@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -63,8 +64,11 @@ public class ProductController {
     // Endpoint para crear un producto
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Product> createProduct(@RequestBody ProductDTO productDTO, @RequestParam String adminEmail) {
+    public ResponseEntity<Product> createProduct(@RequestBody ProductDTO productDTO, @RequestParam String adminEmail,
+                                                 @RequestParam("image") MultipartFile image) {
         try {
+            String imageUrl = productService.saveImage(image);
+            productDTO.setImage_url(imageUrl);
             Product createdProduct = productService.createProduct(productDTO, adminEmail);
             return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
         } catch (ProductAlreadyExistsException e) {
@@ -79,7 +83,10 @@ public class ProductController {
     // Endpoint para actualizar un producto
     @PutMapping("/{productName}")
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Product> updateProduct(@PathVariable String productName, @RequestBody ProductDTO productDTO, @RequestParam String adminEmail) {
+    public ResponseEntity<Product> updateProduct(@PathVariable String productName, @RequestBody ProductDTO productDTO
+            , @RequestParam String adminEmail,@RequestParam("image") MultipartFile image) {
+        String imageUrl = productService.saveImage(image);
+        productDTO.setImage_url(imageUrl);
         Product updatedProduct = productService.updateProduct(productDTO, adminEmail);
         if (updatedProduct != null) {
             return new ResponseEntity<>(updatedProduct, HttpStatus.OK);

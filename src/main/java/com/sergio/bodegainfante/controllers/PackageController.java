@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -42,8 +43,11 @@ public class PackageController {
     // Crear un nuevo paquete
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Package> createPackage(@RequestBody PackageDTO packageDTO, @RequestParam String adminEmail) {
+    public ResponseEntity<Package> createPackage(@RequestBody PackageDTO packageDTO, @RequestParam String adminEmail,
+                                                 @RequestParam("image") MultipartFile image) {
         try {
+            String imageUrl = packageService.saveImage(image);
+            packageDTO.setImage_url(imageUrl);
             Package createdPackage = packageService.createPackage(packageDTO, adminEmail);
             return new ResponseEntity<>(createdPackage, HttpStatus.CREATED);
         } catch (ProductAlreadyExistsException | UnauthorizedAccessException | CategoryNotFoundException |
@@ -55,8 +59,11 @@ public class PackageController {
     // Actualizar un paquete existente
     @PutMapping("/{packageId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Package> updatePackage(@PathVariable Long packageId, @RequestBody PackageDTO packageDTO, @RequestParam String adminEmail) {
+    public ResponseEntity<Package> updatePackage(@PathVariable Long packageId, @RequestBody PackageDTO packageDTO,
+                                                 @RequestParam String adminEmail,@RequestParam("image") MultipartFile image) {
         try {
+            String imageUrl = packageService.saveImage(image);
+            packageDTO.setImage_url(imageUrl);
             Package updatedPackage = packageService.updatePackage(packageId,packageDTO, adminEmail);
             return new ResponseEntity<>(updatedPackage, HttpStatus.OK);
         } catch (PackageNotFoundException | UnauthorizedAccessException | ProductNotFoundException | BadRequestException e) {

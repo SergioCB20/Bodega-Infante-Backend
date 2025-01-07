@@ -39,6 +39,11 @@ public class ProductService implements IProductService {
         return productRepository.findByTextFilter(text);
     }
 
+    public Product findByName(String name) {
+        Optional<Product> product = productRepository.findByName(name);
+        return product.orElse(null);
+    }
+
     @Override
     public List<Product> findByCategory(String categoryName) {
         Category category = categoryRepository.findByName(categoryName);

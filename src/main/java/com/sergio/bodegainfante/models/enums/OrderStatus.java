@@ -1,9 +1,7 @@
 package com.sergio.bodegainfante.models.enums;
 
 public enum OrderStatus {
-    CREATED("Created"),
     SENT("Sent"),
-    RECEIVED("Received"),
     ATTENDED("Attended"),
     CANCELLED("Cancelled");
 

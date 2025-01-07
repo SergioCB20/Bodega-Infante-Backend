@@ -10,8 +10,6 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "items")
 public class Item {
@@ -40,15 +38,59 @@ public class Item {
 
     private LocalDateTime deleted_at;
 
-    @PrePersist
-    public void prePersist() {
-        if (deleted_at == null) {
-            deleted_at = null;
-        }
+    public Long getItem_id() {
+        return item_id;
     }
 
-    @PreUpdate
-    public void preUpdate() {
-        // Realiza actualizaciones necesarias antes de guardar
+    public void setItem_id(Long item_id) {
+        this.item_id = item_id;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public ItemType getType() {
+        return type;
+    }
+
+    public void setType(ItemType type) {
+        this.type = type;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public Package getPackageItem() {
+        return packageItem;
+    }
+
+    public void setPackageItem(Package packageItem) {
+        this.packageItem = packageItem;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public LocalDateTime getDeleted_at() {
+        return deleted_at;
+    }
+
+    public void setDeleted_at(LocalDateTime deleted_at) {
+        this.deleted_at = deleted_at;
     }
 }

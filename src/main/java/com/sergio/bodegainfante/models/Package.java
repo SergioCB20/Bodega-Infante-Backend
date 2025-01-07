@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "packages")
 public class Package {
@@ -54,6 +52,86 @@ public class Package {
     @PreUpdate
     public void preUpdate() {
         this.updated_at = LocalDateTime.now();
+    }
+
+    public Long getPackage_id() {
+        return package_id;
+    }
+
+    public void setPackage_id(Long package_id) {
+        this.package_id = package_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getImage_url() {
+        return image_url;
+    }
+
+    public void setImage_url(String image_url) {
+        this.image_url = image_url;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
+    public LocalDateTime getCreated_at() {
+        return created_at;
+    }
+
+    public void setCreated_at(LocalDateTime created_at) {
+        this.created_at = created_at;
+    }
+
+    public LocalDateTime getDeleted_at() {
+        return deleted_at;
+    }
+
+    public void setDeleted_at(LocalDateTime deleted_at) {
+        this.deleted_at = deleted_at;
+    }
+
+    public LocalDateTime getUpdated_at() {
+        return updated_at;
+    }
+
+    public void setUpdated_at(LocalDateTime updated_at) {
+        this.updated_at = updated_at;
+    }
+
+    public List<PackageProduct> getPackageProducts() {
+        return packageProducts;
+    }
+
+    public void setPackageProducts(List<PackageProduct> packageProducts) {
+        this.packageProducts = packageProducts;
     }
 }
 

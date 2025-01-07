@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
 @NoArgsConstructor
 public class PackageProduct {
 
@@ -26,5 +24,37 @@ public class PackageProduct {
 
     @NotNull
     private int quantity;
+
+    public Long getPxp_id() {
+        return pxp_id;
+    }
+
+    public void setPxp_id(Long pxp_id) {
+        this.pxp_id = pxp_id;
+    }
+
+    public Package getPkg() {
+        return pkg;
+    }
+
+    public void setPkg(Package pkg) {
+        this.pkg = pkg;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }
 

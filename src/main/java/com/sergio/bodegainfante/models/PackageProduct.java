@@ -1,5 +1,6 @@
 package com.sergio.bodegainfante.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -16,6 +17,7 @@ public class PackageProduct {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", referencedColumnName = "package_id")
+    @JsonIgnore
     private Package pkg;
 
     @ManyToOne(fetch = FetchType.LAZY)

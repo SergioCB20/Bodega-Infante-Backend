@@ -17,12 +17,15 @@ import java.util.Optional;
 public class UserService implements IUserService {
     @Autowired
     UserRepository userRepository;
+
+
     @Override
     public CustomerInfoDTO getCustomerInfo(String email) {
         Optional<User> user = userRepository.findByEmail(email);
         CustomerInfoDTO customerInfoDTO = new CustomerInfoDTO();
         if (user.isPresent()) {
             Customer customer = (Customer) user.get();
+            customerInfoDTO.setId(user.get().getUser_id());
             customerInfoDTO.setFirstName(customer.getFirst_name());
             customerInfoDTO.setLastName(customer.getLast_name());
             customerInfoDTO.setEmail(customer.getEmail());
@@ -38,6 +41,7 @@ public class UserService implements IUserService {
         AdminInfoDTO adminInfoDTO = new AdminInfoDTO();
         if (user.isPresent()) {
             Admin admin = (Admin) user.get();
+            adminInfoDTO.setId(admin.getUser_id());
             adminInfoDTO.setFirstName(admin.getFirst_name());
             adminInfoDTO.setLastName(admin.getLast_name());
             adminInfoDTO.setEmail(admin.getEmail());

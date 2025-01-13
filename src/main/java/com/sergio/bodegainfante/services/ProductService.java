@@ -65,8 +65,11 @@ public class ProductService implements IProductService {
 
     @Override
     public List<Product> findByCategory(String categoryName) {
-        Category category = categoryRepository.findByName(categoryName);
-        return productRepository.findByCategory(category);
+        Optional <Category> category = categoryRepository.findByName(categoryName);
+        if(category.isPresent()) {
+            return productRepository.findByCategory(category.get());
+        }
+        return null;
     }
 
     @Transactional
@@ -89,11 +92,11 @@ public class ProductService implements IProductService {
         newProduct.setDescription(productDTO.getDescription());
         newProduct.setPrice(productDTO.getPrice());
 
-        Category category = categoryRepository.findByName(productDTO.getCategoryName());
-        if (category == null) {
+        Optional<Category> category = categoryRepository.findByName(productDTO.getCategoryName());
+        if (category.isEmpty()) {
             throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryName());
         }
-        newProduct.setCategory(category);
+        newProduct.setCategory(category.get());
 
         newProduct.setImage_url(productDTO.getImage_url());
         newProduct.setCreated_at(LocalDateTime.now());
@@ -123,11 +126,11 @@ public class ProductService implements IProductService {
             product.setName(productDTO.getName());
             product.setDescription(productDTO.getDescription());
             product.setPrice(productDTO.getPrice());
-            Category category = categoryRepository.findByName(productDTO.getCategoryName());
-            if (category == null) {
+            Optional<Category> category = categoryRepository.findByName(productDTO.getCategoryName());
+            if (category.isEmpty()) {
                 throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryName());
             }
-            product.setCategory(category);
+            product.setCategory(category.get());
             product.setImage_url(productDTO.getImage_url());
             product.setUpdated_at(LocalDateTime.now());
             Product savedProduct = productRepository.save(product);

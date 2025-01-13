@@ -35,7 +35,7 @@ public class JwtUtils {
                     .collect(Collectors.toList());
 
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                    .subject(userPrincipal.getUsername())  // El nombre de usuario (subject)
+                    .subject(userPrincipal.getUsername())// El nombre de usuario (subject)
                     .issueTime(new Date())  // Hora de emisión
                     .expirationTime(new Date(System.currentTimeMillis() + 86400000))  // 24 horas de expiración
                     .claim("roles", roles)  // Pasar los roles como lista de cadenas

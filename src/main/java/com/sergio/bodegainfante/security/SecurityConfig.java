@@ -5,6 +5,7 @@ import com.sergio.bodegainfante.security.jwt.JwtUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -51,6 +52,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/shop/**").permitAll()
                                 .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->

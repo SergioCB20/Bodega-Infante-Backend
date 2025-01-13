@@ -7,8 +7,18 @@ import java.util.List;
 
 
 public class CustomerInfoDTO {
+    private Long id;
     private String firstName;
     private String lastName;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     private String email;
     private String phone;
     List<Order> orders;

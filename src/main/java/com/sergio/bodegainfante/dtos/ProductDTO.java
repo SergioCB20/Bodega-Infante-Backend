@@ -8,6 +8,8 @@ public class ProductDTO {
     @Size(min = 3, max = 255)
     private String name;
     private String description;
+
+
     @NotNull
     private double price;
     private String image_url;

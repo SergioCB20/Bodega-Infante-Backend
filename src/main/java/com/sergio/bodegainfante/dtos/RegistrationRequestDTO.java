@@ -22,8 +22,19 @@ public class RegistrationRequestDTO {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    @NotBlank
     private String confirmPassword;
 
+    @NotBlank
+    private String phone;
     // Getters y Setters
     public String getFirstName() {
         return firstName;

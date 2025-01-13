@@ -15,13 +15,21 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @GetMapping("/{email}")
+    public ResponseEntity<?> getUser(@PathVariable String email, @RequestBody String role) {
+        if(role.equals("ROLE_ADMIN")) {
+            AdminInfoDTO adminInfoDTO = userService.getAdminInfo(email);
+            return new ResponseEntity<>(adminInfoDTO, HttpStatus.OK);
+        }
+        CustomerInfoDTO customerInfoDTO = userService.getCustomerInfo(email);
+        return new ResponseEntity<>(customerInfoDTO, HttpStatus.OK);
+    }
 
     @GetMapping("/me")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -35,6 +43,7 @@ public class UserController {
             }
 
             CustomerInfoDTO customerInfoDTO = userService.getCustomerInfo(email);
+            System.out.println("customerInfoDTO: " + customerInfoDTO);
             return new ResponseEntity<>(customerInfoDTO, HttpStatus.OK);
         }
 

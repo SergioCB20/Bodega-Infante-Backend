@@ -59,7 +59,7 @@ public class AuthService implements IAuthService {
         user.setRole(Role.CUSTOMER); // Establecer el rol por defecto
         user.setEmail(registrationRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registrationRequest.getPassword())); // Encriptar la contraseña
-
+        user.setPhone_number(registrationRequest.getPhone());
         userRepository.save(user);
 
         response.put("message", "User registered successfully");

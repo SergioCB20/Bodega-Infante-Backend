@@ -2,12 +2,14 @@ package com.sergio.bodegainfante.controllers;
 
 import com.sergio.bodegainfante.dtos.PackageDTO;
 import com.sergio.bodegainfante.exceptions.*;
+import com.sergio.bodegainfante.security.UserDetailsImpl;
 import com.sergio.bodegainfante.services.PackageService;
 import com.sergio.bodegainfante.models.Package;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,9 +61,10 @@ public class PackageController {
     // Actualizar un paquete existente
     @PutMapping("/{packageId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Package> updatePackage(@PathVariable Long packageId, @RequestBody PackageDTO packageDTO,
-                                                 @RequestParam String adminEmail,@RequestParam("image") MultipartFile image) {
+    public ResponseEntity<Package> updatePackage(@PathVariable Long packageId, @RequestBody PackageDTO packageDTO
+            , @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("image") MultipartFile image) {
         try {
+            String adminEmail = userDetails.getUsername();
             String imageUrl = packageService.saveImage(image);
             packageDTO.setImage_url(imageUrl);
             Package updatedPackage = packageService.updatePackage(packageId,packageDTO, adminEmail);
@@ -71,11 +74,11 @@ public class PackageController {
         }
     }
 
-    // Eliminar un paquete (eliminación lógica)
     @DeleteMapping("/{packageId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deletePackage(@PathVariable Long packageId, @RequestParam String adminEmail) {
+    public ResponseEntity<Void> deletePackage(@PathVariable Long packageId,@AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
+            String adminEmail = userDetails.getUsername();
             boolean isDeleted = packageService.deletePackage(packageId, adminEmail);
             if (isDeleted) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);

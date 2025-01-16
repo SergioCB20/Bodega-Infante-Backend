@@ -1,12 +1,10 @@
 package com.sergio.bodegainfante.services;
 
 import com.sergio.bodegainfante.dtos.CategoryDTO;
-import com.sergio.bodegainfante.models.Admin;
-import com.sergio.bodegainfante.models.Category;
-import com.sergio.bodegainfante.models.Modification;
-import com.sergio.bodegainfante.models.User;
+import com.sergio.bodegainfante.models.*;
 import com.sergio.bodegainfante.repositories.CategoryRepository;
 import com.sergio.bodegainfante.repositories.ModificationRepository;
+import com.sergio.bodegainfante.repositories.ProductRepository;
 import com.sergio.bodegainfante.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,8 @@ public class CategoryService implements ICategoryService {
     private ModificationRepository modificationRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     @Transactional
     @Override
@@ -95,8 +95,8 @@ public class CategoryService implements ICategoryService {
 
     @Transactional
     @Override
-    public boolean deleteCategory(String categoryName, String adminEmail) {
-        Optional<Category> category = categoryRepository.findByName(categoryName);
+    public boolean deleteCategory(Long id, String adminEmail) {
+        Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
             Optional<User> user = userRepository.findByEmail(adminEmail);
             if (user.isEmpty() || !(user.get() instanceof Admin)) {
@@ -104,10 +104,19 @@ public class CategoryService implements ICategoryService {
             }
             Admin admin = (Admin) user.get();
 
-            category.get().setUpdated_at(LocalDateTime.now());
-            category.get().setDeleted_at(LocalDateTime.now());
-            categoryRepository.save(category.get());
+            // Obtener los productos relacionados y eliminarlos
+            List<Product> products = category.get().getProducts();
+            for (Product product : products) {
+                product.setCategory(null);
+                productRepository.save(product);
+            }
 
+            String categoryName = category.get().getName();
+
+            // Eliminación real de la categoría
+            categoryRepository.delete(category.get());
+
+            // Crear un registro de modificación
             Modification modification = new Modification();
             modification.setAdmin(admin);
             modification.setDescription("Category " + categoryName + " deleted");
@@ -117,4 +126,5 @@ public class CategoryService implements ICategoryService {
         }
         return false;
     }
+
 }

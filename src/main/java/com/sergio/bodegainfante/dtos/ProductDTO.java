@@ -9,12 +9,11 @@ public class ProductDTO {
     private String name;
     private String description;
 
-
     @NotNull
     private double price;
     private String image_url;
     @NotNull
-    private String categoryName;
+    private Long categoryId;
 
     public String getName() {
         return name;
@@ -44,15 +43,16 @@ public class ProductDTO {
         return image_url;
     }
 
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
     public void setImage_url(String image_url) {
         this.image_url = image_url;
     }
 
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
 }

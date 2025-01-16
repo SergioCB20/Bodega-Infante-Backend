@@ -23,6 +23,7 @@ public class AdminController {
     @GetMapping("/customers")
     public ResponseEntity<List<CustomerInfoDTO>> getAllCustomers() {
         List<CustomerInfoDTO> customers = adminService.getAllCustomers();
+        System.out.println(customers);
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
     @GetMapping("/admins")

@@ -38,7 +38,6 @@ public class Package {
     @Column(nullable = false)
     private LocalDateTime updated_at;
 
-    private LocalDateTime deleted_at;
 
     @OneToMany(mappedBy = "pkg")
     private List<PackageProduct> packageProducts;
@@ -108,14 +107,6 @@ public class Package {
 
     public void setCreated_at(LocalDateTime created_at) {
         this.created_at = created_at;
-    }
-
-    public LocalDateTime getDeleted_at() {
-        return deleted_at;
-    }
-
-    public void setDeleted_at(LocalDateTime deleted_at) {
-        this.deleted_at = deleted_at;
     }
 
     public LocalDateTime getUpdated_at() {

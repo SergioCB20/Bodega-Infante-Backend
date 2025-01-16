@@ -48,25 +48,28 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/api/auth/**").permitAll()  // Public auth routes
-                                .requestMatchers("/api/shop/**").permitAll()
-                                .requestMatchers("/api/customers/**").hasRole("CUSTOMER")
-                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()  // Permite todas las solicitudes OPTIONS
+                                .requestMatchers("/api/auth/**").permitAll()  // Rutas públicas de autenticación
+                                .requestMatchers("/api/shop/**").permitAll()  // Rutas públicas de la tienda
+                                .requestMatchers("/api/categories/**").permitAll()  // Rutas públicas para categorías
+                                .requestMatchers("/api/products/**").permitAll()  // Rutas públicas para productos
+                                .requestMatchers("/api/packages/**").permitAll()  // Rutas públicas para paquetes
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")  // Solo accesible para ADMIN
+                                .requestMatchers("/api/customers/**").hasRole("CUSTOMER")  // Solo accesible para CUSTOMER
+                                .anyRequest().authenticated()  // Requiere autenticación para cualquier otra ruta
                 )
                 .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Stateless sessions
+                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Configura sesiones sin estado
                 )
-                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)  // Agregar filtro JWT
+                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class)  // Agrega filtro JWT
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling
                                 .authenticationEntryPoint((request, response, authException) -> {
                                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
                                 })
                 ).build();
-
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

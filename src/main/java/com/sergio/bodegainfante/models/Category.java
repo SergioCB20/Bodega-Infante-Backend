@@ -1,5 +1,6 @@
 package com.sergio.bodegainfante.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,6 +24,7 @@ public class Category {
 
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "category")
     private List<Product> products;
 
@@ -31,8 +33,6 @@ public class Category {
 
     @Column(nullable = false)
     private LocalDateTime updated_at;
-
-    private LocalDateTime deleted_at;
 
     @PrePersist
     public void prePersist() {
@@ -93,12 +93,5 @@ public class Category {
         this.updated_at = updated_at;
     }
 
-    public LocalDateTime getDeleted_at() {
-        return deleted_at;
-    }
-
-    public void setDeleted_at(LocalDateTime deleted_at) {
-        this.deleted_at = deleted_at;
-    }
 }
 

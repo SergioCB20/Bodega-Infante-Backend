@@ -40,8 +40,6 @@ public class Product {
     @Column(nullable = false)
     private LocalDateTime updated_at;
 
-    private LocalDateTime deleted_at;
-
     @OneToMany(mappedBy = "product")
     private List<PackageProduct> packageProducts;
 
@@ -127,15 +125,6 @@ public class Product {
     public void setUpdated_at(LocalDateTime updated_at) {
         this.updated_at = updated_at;
     }
-
-    public LocalDateTime getDeleted_at() {
-        return deleted_at;
-    }
-
-    public void setDeleted_at(LocalDateTime deleted_at) {
-        this.deleted_at = deleted_at;
-    }
-
     public List<PackageProduct> getPackageProducts() {
         return packageProducts;
     }

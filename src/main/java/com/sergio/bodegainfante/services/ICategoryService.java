@@ -10,6 +10,6 @@ public interface ICategoryService {
     List<Category> findAll();
     Category createCategory(CategoryDTO categoryDTO, String adminEmail);
     Category updateCategory(CategoryDTO categoryDTO, String adminEmail);
-    boolean deleteCategory(String categoryName, String adminEmail);
+    boolean deleteCategory(Long id, String adminEmail);
 }
 

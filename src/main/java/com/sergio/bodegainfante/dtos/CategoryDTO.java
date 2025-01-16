@@ -14,14 +14,6 @@ public class CategoryDTO {
     @NotNull
     private String description;
 
-    public List<Long> getProductsId() {
-        return productsId;
-    }
-
-    public void setProductsId(List<Long> productsId) {
-        this.productsId = productsId;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -38,6 +30,4 @@ public class CategoryDTO {
         this.name = name;
     }
 
-    @NotNull
-    private List<Long> productsId;
 }

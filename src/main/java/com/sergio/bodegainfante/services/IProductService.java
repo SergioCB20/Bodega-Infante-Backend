@@ -11,12 +11,12 @@ public interface IProductService {
 
     List<Product> findByTextFilter(String text);
 
-    List<Product> findByCategory(String categoryName);
+    List<Product> findByCategory(Long categoryId);
 
     Product createProduct(ProductDTO productDTO, String adminEmail);
 
     Product updateProduct(ProductDTO productDTO, String adminEmail);
 
-    boolean deleteProduct(String productName, String adminEmail);
+    boolean deleteProduct(Long id, String adminEmail);
 }
 

@@ -3,11 +3,13 @@ import com.sergio.bodegainfante.dtos.CategoryDTO;
 import com.sergio.bodegainfante.exceptions.CategoryAlreadyExistsException;
 import com.sergio.bodegainfante.exceptions.UnauthorizedAccessException;
 import com.sergio.bodegainfante.models.Category;
+import com.sergio.bodegainfante.security.UserDetailsImpl;
 import com.sergio.bodegainfante.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -31,9 +33,10 @@ public class CategoryController {
     // Endpoint para crear una nueva categoría
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Category> createCategory(@RequestBody CategoryDTO categoryDTO, @RequestParam String adminEmail) {
+    public ResponseEntity<Category> createCategory(@RequestBody CategoryDTO categoryDTO, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
-            Category createdCategory = categoryService.createCategory(categoryDTO, adminEmail);
+            String email = userDetails.getUsername();
+            Category createdCategory = categoryService.createCategory(categoryDTO, email);
             return new ResponseEntity<>(createdCategory, HttpStatus.CREATED);
         } catch (CategoryAlreadyExistsException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // La categoría ya existe
@@ -43,10 +46,12 @@ public class CategoryController {
     }
 
     // Endpoint para actualizar una categoría existente
-    @PutMapping("/{categoryName}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Category> updateCategory(@PathVariable String categoryName, @RequestBody CategoryDTO categoryDTO, @RequestParam String adminEmail) {
-        Category updatedCategory = categoryService.updateCategory(categoryDTO, adminEmail);
+    public ResponseEntity<Category> updateCategory(@RequestBody CategoryDTO categoryDTO,
+                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String email = userDetails.getUsername();
+        Category updatedCategory = categoryService.updateCategory(categoryDTO, email);
         if (updatedCategory != null) {
             return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
         } else {
@@ -55,14 +60,15 @@ public class CategoryController {
     }
 
     // Endpoint para eliminar una categoría
-    @DeleteMapping("/{categoryName}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Void> deleteCategory(@PathVariable String categoryName, @RequestParam String adminEmail) {
-        boolean isDeleted = categoryService.deleteCategory(categoryName, adminEmail);
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        String email = userDetails.getUsername();
+        boolean isDeleted = categoryService.deleteCategory(id, email);
         if (isDeleted) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Categoría eliminada correctamente
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND); // Categoría no encontrada
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

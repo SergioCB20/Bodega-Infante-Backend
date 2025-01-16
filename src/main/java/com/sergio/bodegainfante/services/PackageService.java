@@ -153,7 +153,6 @@ public class PackageService implements IPackageService {
                 packageProduct.setProduct(product.get());
                 packageProductList.add(packageProduct);
             } else {
-                // Si algún producto no se encuentra, lanzamos una excepción
                 throw new ProductNotFoundException("Product with ID " + productDTO.getProductId() + " not found.");
             }
         }
@@ -194,15 +193,14 @@ public class PackageService implements IPackageService {
         }
         Admin admin = (Admin) user.get();
 
-        // Marcar el paquete como eliminado (eliminación lógica)
         Package packageToDelete = packageOptional.get();
-        packageToDelete.setDeleted_at(LocalDateTime.now());
-        packageRepository.save(packageToDelete);
+        String packageName = packageToDelete.getName();
+        packageRepository.delete(packageToDelete);
 
         // Registrar la modificación
         Modification modification = new Modification();
         modification.setAdmin(admin);
-        modification.setDescription("Package " + packageToDelete.getName() + " deleted");
+        modification.setDescription("Package " + packageName + " deleted");
         modificationRepository.save(modification);
 
         return true;

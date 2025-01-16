@@ -40,6 +40,7 @@ public class AdminService implements IAdminService {
         for (User user : users) {
                 Customer customer = (Customer) user;
                 CustomerInfoDTO customerInfoDTO = new CustomerInfoDTO();
+                customerInfoDTO.setId(customer.getUser_id());
                 customerInfoDTO.setFirstName(customer.getFirst_name());
                 customerInfoDTO.setLastName(customer.getLast_name());
                 customerInfoDTO.setEmail(customer.getEmail());

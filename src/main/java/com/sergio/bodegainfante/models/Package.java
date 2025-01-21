@@ -1,5 +1,6 @@
 package com.sergio.bodegainfante.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -40,6 +41,7 @@ public class Package {
 
 
     @OneToMany(mappedBy = "pkg")
+    @JsonManagedReference
     private List<PackageProduct> packageProducts;
 
     @PrePersist

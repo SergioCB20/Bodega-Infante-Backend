@@ -30,8 +30,8 @@ public class Product {
     @NotNull
     private boolean available;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")  // El nombre de la columna de la llave foránea
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "category_id")
     private Category category;
 
     @Column(nullable = false, updatable = false)

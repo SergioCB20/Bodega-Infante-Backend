@@ -1,5 +1,6 @@
 package com.sergio.bodegainfante.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sergio.bodegainfante.dtos.PackageDTO;
 import com.sergio.bodegainfante.exceptions.*;
 import com.sergio.bodegainfante.security.UserDetailsImpl;
@@ -45,29 +46,35 @@ public class PackageController {
     // Crear un nuevo paquete
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Package> createPackage(@RequestBody PackageDTO packageDTO, @RequestParam String adminEmail,
-                                                 @RequestParam("image") MultipartFile image) {
+    public ResponseEntity<?> createPackage(
+            @RequestPart("data") String rawData,
+            @RequestPart(value = "image", required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
         try {
-            String imageUrl = packageService.saveImage(image);
-            packageDTO.setImage_url(imageUrl);
-            Package createdPackage = packageService.createPackage(packageDTO, adminEmail);
+            System.out.println("Raw JSON recibido: " + rawData);
+            ObjectMapper objectMapper = new ObjectMapper();
+            PackageDTO packageDTO = objectMapper.readValue(rawData, PackageDTO.class);
+            String adminEmail = userDetails.getUsername();
+            Package createdPackage = packageService.createPackage(packageDTO,image, adminEmail);
+
             return new ResponseEntity<>(createdPackage, HttpStatus.CREATED);
-        } catch (ProductAlreadyExistsException | UnauthorizedAccessException | CategoryNotFoundException |
-                 BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
         }
     }
 
-    // Actualizar un paquete existente
+
+
+
+
     @PutMapping("/{packageId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Package> updatePackage(@PathVariable Long packageId, @RequestBody PackageDTO packageDTO
             , @AuthenticationPrincipal UserDetailsImpl userDetails, @RequestParam("image") MultipartFile image) {
         try {
             String adminEmail = userDetails.getUsername();
-            String imageUrl = packageService.saveImage(image);
-            packageDTO.setImage_url(imageUrl);
-            Package updatedPackage = packageService.updatePackage(packageId,packageDTO, adminEmail);
+            Package updatedPackage = packageService.updatePackage(packageId,image,packageDTO, adminEmail);
             return new ResponseEntity<>(updatedPackage, HttpStatus.OK);
         } catch (PackageNotFoundException | UnauthorizedAccessException | ProductNotFoundException | BadRequestException e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

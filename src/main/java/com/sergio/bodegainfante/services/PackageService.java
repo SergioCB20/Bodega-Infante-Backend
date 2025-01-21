@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,10 +34,12 @@ public class PackageService implements IPackageService {
     private UserRepository userRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private PackageProducRepository packageProducRepository;
 
     private static final String IMAGE_DIR = "src/main/resources/static/images/";
 
-    public String saveImage(MultipartFile image) {
+    private String saveImage(MultipartFile image) {
         try {
             String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
             Path path = Paths.get(IMAGE_DIR + fileName);
@@ -46,6 +49,27 @@ public class PackageService implements IPackageService {
             throw new RuntimeException("Failed to store image", e);
         }
     }
+
+    private void deleteImage(String imageUrl) {
+        try {
+            // Extrae el nombre del archivo desde la URL
+            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+            File file = new File(IMAGE_DIR, fileName);
+
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("Imagen eliminada: " + fileName);
+                } else {
+                    throw new RuntimeException("No se pudo eliminar la imagen: " + fileName);
+                }
+            } else {
+                throw new RuntimeException("La imagen no existe: " + fileName);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la imagen", e);
+        }
+    }
+
     @Override
     public List<Package> findAll() {
         return packageRepository.findAll();
@@ -58,13 +82,17 @@ public class PackageService implements IPackageService {
 
     @Transactional
     @Override
-    public Package createPackage(PackageDTO packageDTO, String adminEmail) {
+    public Package createPackage(PackageDTO packageDTO,MultipartFile image, String adminEmail) {
         Optional<Package> optionalPackage = packageRepository.findByName(packageDTO.getName());
         if (optionalPackage.isPresent()) {
             throw new PackageAlreadyExistsException("Package with name " + packageDTO.getName() + " already exists.");
         }
 
-        // Buscar el admin
+        if(image!=null){
+            String newUrl = saveImage(image);
+            packageDTO.setImage_url(newUrl);
+        }
+
         Optional<User> user = userRepository.findByEmail(adminEmail);
         if (user.isEmpty() || !(user.get() instanceof Admin)) {
             throw new UnauthorizedAccessException("User is not an admin or does not exist.");
@@ -89,6 +117,7 @@ public class PackageService implements IPackageService {
                 packageProduct.setQuantity(productDTO.getQuantity());
                 packageProduct.setProduct(product.get());
                 packageProductList.add(packageProduct);
+                packageProducRepository.save(packageProduct);
             } else {
                 // Si algún producto no se encuentra, lanzamos una excepción
                 throw new ProductNotFoundException("Product with ID " + productDTO.getProductId() + " not found.");
@@ -120,11 +149,17 @@ public class PackageService implements IPackageService {
 
     @Transactional
     @Override
-    public Package updatePackage(Long packageId,PackageDTO packageDTO, String adminEmail) {
+    public Package updatePackage(Long packageId,MultipartFile image,PackageDTO packageDTO, String adminEmail) {
         // Verificar si el paquete existe
         Optional<Package> optionalPackage = packageRepository.findById(packageId);
         if (optionalPackage.isEmpty()) {
             throw new PackageNotFoundException("Package "  + " not found.");
+        }
+
+        if(image!=null){
+            if(optionalPackage.get().getImage_url()!=null){deleteImage(optionalPackage.get().getImage_url());}
+            String newUrl = saveImage(image);
+            packageDTO.setImage_url(newUrl);
         }
 
         // Buscar el admin

@@ -49,9 +49,10 @@ public class CategoryController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
     public ResponseEntity<Category> updateCategory(@RequestBody CategoryDTO categoryDTO,
+                                                   @PathVariable Long id,
                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
         String email = userDetails.getUsername();
-        Category updatedCategory = categoryService.updateCategory(categoryDTO, email);
+        Category updatedCategory = categoryService.updateCategory(categoryDTO,id, email);
         if (updatedCategory != null) {
             return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
         } else {

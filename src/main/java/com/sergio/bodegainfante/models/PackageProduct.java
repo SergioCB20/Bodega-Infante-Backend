@@ -1,5 +1,6 @@
 package com.sergio.bodegainfante.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -17,11 +18,12 @@ public class PackageProduct {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "package_id", referencedColumnName = "package_id")
-    @JsonIgnore
+    @JsonBackReference
     private Package pkg;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
+    @JsonBackReference
     private Product product;
 
     @NotNull

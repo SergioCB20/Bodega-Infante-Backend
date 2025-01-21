@@ -66,8 +66,8 @@ public class CategoryService implements ICategoryService {
 
     @Transactional
     @Override
-    public Category updateCategory(CategoryDTO categoryDTO, String adminEmail) {
-        Optional<Category> optionalCategory = categoryRepository.findByName(categoryDTO.getName());
+    public Category updateCategory(CategoryDTO categoryDTO,Long id, String adminEmail) {
+        Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isPresent()) {
             Optional<User> user = userRepository.findByEmail(adminEmail);
             if (user.isEmpty() || !(user.get() instanceof Admin)) {

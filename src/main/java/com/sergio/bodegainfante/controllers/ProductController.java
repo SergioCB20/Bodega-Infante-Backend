@@ -25,82 +25,87 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping
-    public ResponseEntity<List<Product>> getAllProducts() {
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
         List<Product> products = productService.findAll();
+        List<ProductDTO> productDTOS = products.stream().map(ProductDTO::new).toList();
         if (products.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
     @GetMapping("/{productName}")
-    public ResponseEntity<Product> getProductByName(@PathVariable String productName) {
+    public ResponseEntity<ProductDTO> getProductByName(@PathVariable String productName) {
         Product product= productService.findByName(productName);
-        if (product != null) {
-            return new ResponseEntity<>(product, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        ProductDTO productDTO = new ProductDTO(product);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
     // Endpoint para filtrar productos por texto
     @GetMapping("/filter")
-    public ResponseEntity<List<Product>> getProductsByTextFilter(@RequestParam String text) {
+    public ResponseEntity<List<ProductDTO>> getProductsByTextFilter(@RequestParam String text) {
         List<Product> products = productService.findByTextFilter(text);
+        List<ProductDTO> productDTOS = products.stream().map(ProductDTO::new).toList();
         if (products.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
-    // Endpoint para obtener productos por categoría
     @GetMapping("/category/{id}")
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable Long id) {
+    public ResponseEntity<List<ProductDTO>> getProductsByCategory(@PathVariable Long id) {
         List<Product> products = productService.findByCategory(id);
+        List<ProductDTO> productDTOS = products.stream().map(ProductDTO::new).toList();
         if (products.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Si no se encuentran productos
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        return new ResponseEntity<>(productDTOS, HttpStatus.OK);
     }
 
     // Endpoint para crear un producto
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Product> createProduct(@RequestBody ProductDTO productDTO, @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @RequestParam("image") MultipartFile image) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductDTO> createProduct(
+            @RequestParam("name") String name,
+            @RequestParam(value = "description",required = false) String description,
+            @RequestParam("price") double price,
+            @RequestParam("categoryName") String categoryName,
+            @RequestParam(value = "image",required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetailsImpl userDetails
+    ) {
         try {
-            String imageUrl = productService.saveImage(image);
-            productDTO.setImage_url(imageUrl);
-            String email = userDetails.getUsername();
-            Product createdProduct = productService.createProduct(productDTO, email);
-            return new ResponseEntity<>(createdProduct, HttpStatus.CREATED);
-        } catch (ProductAlreadyExistsException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Producto ya existe
-        } catch (CategoryNotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Categoría no encontrada
-        } catch (UnauthorizedAccessException e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN); // El usuario no tiene acceso
+            ProductDTO productDTO = new ProductDTO(name, description!=null?description:"", price, categoryName);
+            Product createdProduct = productService.createProduct(productDTO,image,userDetails.getUsername());
+            ProductDTO createdProductDTO = new ProductDTO(createdProduct);
+            return new ResponseEntity<>(createdProductDTO, HttpStatus.CREATED);
+        } catch (Exception e) {
+            System.out.println(e);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+
 
     // Endpoint para actualizar un producto
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
-    public ResponseEntity<Product> updateProduct(@RequestBody ProductDTO productDTO
-            ,  @AuthenticationPrincipal UserDetailsImpl userDetails,@RequestParam("image") MultipartFile image) {
-        String imageUrl = productService.saveImage(image);
-        productDTO.setImage_url(imageUrl);
+    public ResponseEntity<ProductDTO> updateProduct(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam(value = "description",required = false) String description,
+            @RequestParam("price") double price,
+            @RequestParam("categoryName") String categoryName,
+            @RequestParam(value = "image",required = false) MultipartFile image,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        ProductDTO productDTO = new ProductDTO(name, description!=null?description:"", price, categoryName);
         String email = userDetails.getUsername();
-        Product updatedProduct = productService.updateProduct(productDTO, email);
-        if (updatedProduct != null) {
-            return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        Product updatedProduct = productService.updateProduct(id,productDTO,image, email);
+        ProductDTO updatedProductDTO = new ProductDTO(updatedProduct);
+        return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')") // Solo acceso para ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         String email = userDetails.getUsername();
         boolean isDeleted = productService.deleteProduct(id, email);

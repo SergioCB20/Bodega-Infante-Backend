@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +37,7 @@ public class ProductService implements IProductService {
 
     private static final String IMAGE_DIR = "src/main/resources/static/images/";
 
-    public String saveImage(MultipartFile image) {
+    private String saveImage(MultipartFile image) {
         try {
             String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
             Path path = Paths.get(IMAGE_DIR + fileName);
@@ -44,6 +45,27 @@ public class ProductService implements IProductService {
             return "/images/" + fileName;  // Esta es la URL relativa de la imagen
         } catch (IOException e) {
             throw new RuntimeException("Failed to store image", e);
+        }
+    }
+
+    private void deleteImage(String imageUrl) {
+        try {
+            // Extrae el nombre del archivo desde la URL
+            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+            System.out.println("------------BORRANDO: " + fileName + " -------------------------------");
+            File file = new File(IMAGE_DIR, fileName);
+
+            if (file.exists()) {
+                if (file.delete()) {
+                    System.out.println("Imagen eliminada: " + fileName);
+                } else {
+                    throw new RuntimeException("No se pudo eliminar la imagen: " + fileName);
+                }
+            } else {
+                throw new RuntimeException("La imagen no existe: " + fileName);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar la imagen", e);
         }
     }
 
@@ -71,10 +93,15 @@ public class ProductService implements IProductService {
 
     @Transactional
     @Override
-    public Product createProduct(ProductDTO productDTO, String adminEmail) {
+    public Product createProduct(ProductDTO productDTO, MultipartFile image, String adminEmail) {
         Optional<Product> optionalProduct = productRepository.findByName(productDTO.getName());
         if (optionalProduct.isPresent()) {
             throw new ProductAlreadyExistsException("Product with name " + productDTO.getName() + " already exists.");
+        }
+
+        if(image!=null) {
+            String newUrl = saveImage(image);
+            productDTO.setImage_url(newUrl);
         }
 
         // Buscar el admin
@@ -88,10 +115,10 @@ public class ProductService implements IProductService {
         newProduct.setName(productDTO.getName());
         newProduct.setDescription(productDTO.getDescription());
         newProduct.setPrice(productDTO.getPrice());
-
-        Optional<Category> category = categoryRepository.findById(productDTO.getCategoryId());
+        System.out.println(productDTO.getCategoryName());
+        Optional<Category> category = categoryRepository.findByName(productDTO.getCategoryName());
         if (category.isEmpty()) {
-            throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryId());
+            throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryName());
         }
         newProduct.setCategory(category.get());
         category.get().getProducts().add(newProduct);
@@ -111,9 +138,17 @@ public class ProductService implements IProductService {
 
     @Transactional
     @Override
-    public Product updateProduct(ProductDTO productDTO, String adminEmail) {
-        Optional<Product> optionalProduct = productRepository.findByName(productDTO.getName());
+    public Product updateProduct(Long id,ProductDTO productDTO,MultipartFile image, String adminEmail) {
+        Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
+
+            if(image!=null) {
+                if(optionalProduct.get().getImage_url()!=null)
+                {deleteImage(optionalProduct.get().getImage_url());}
+                String newUrl = saveImage(image);
+                productDTO.setImage_url(newUrl);
+            }
+
             Optional<User> user = userRepository.findByEmail(adminEmail);
             if (user.isEmpty() || !(user.get() instanceof Admin)) {
                 throw new UnauthorizedAccessException("User is not an admin or does not exist.");
@@ -130,16 +165,16 @@ public class ProductService implements IProductService {
             product.setPrice(productDTO.getPrice());
 
             // Verificar si la nueva categoría existe
-            Optional<Category> category = categoryRepository.findById(productDTO.getCategoryId());
+            Optional<Category> category = categoryRepository.findByName(productDTO.getCategoryName());
             if (category.isEmpty()) {
-                throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryId());
+                throw new CategoryNotFoundException("Category not found: " + productDTO.getCategoryName());
             }
 
             // Si el producto cambió de categoría, eliminarlo de la categoría anterior
             if (!product.getCategory().equals(category.get())) {
                 // Eliminar el producto de la lista de productos de la categoría anterior
-                oldCategory.getProducts().remove(product);  // Elimina el producto de la lista de la categoría anterior
-                categoryRepository.save(oldCategory);  // Guardar la categoría anterior actualizada
+                oldCategory.getProducts().remove(product);
+                categoryRepository.save(oldCategory);
             }
 
             // Asignar la nueva categoría
